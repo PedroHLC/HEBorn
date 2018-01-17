@@ -53,6 +53,15 @@ compile:
 compile-loop:
 	-while :; do $(MAKE) compile; sleep 2; done
 
+# Crazy Compile Method
+crazy-compile:
+	taskset -c 4-7 sysconfcpus -n 4 elm-make src/MainSimple.elm
+	taskset -c 0-2 sysconfcpus -n 3 elm-make src/MainUpdate.elm &
+	taskset -c 3-6 sysconfcpus -n 4 elm-make src/MainView.elm &
+	taskset -c 7 sysconfcpus -n 1 elm-make src/MainSubscriptions.elm
+	-while [[ `$(list_instances)` ]]; do sleep 1; done
+	elm-make $(main)
+
 ################################################################################
 # Build
 ################################################################################
